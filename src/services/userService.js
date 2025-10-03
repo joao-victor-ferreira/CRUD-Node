@@ -1,69 +1,34 @@
-// src/services/userService.js
-import User from "../models/User.js";
+import UserRepository from "../repositories/userRepository.js";
+import { UserCreateDTO } from "../dtos/user/userCreate.dto.js";
+import { UserUpdateDTO } from "../dtos/user/userUpdate.dto.js";
+import { UserResponseDTO } from "../dtos/user/userResponse.dto.js";
 
-// Criar usuário
-export const createUser = async (data) => {
-  const { name, email, idade } = data;
-
-  if (!name || !email || idade === undefined) {
-    const error = new Error("name, email e idade são obrigatórios");
-    error.statusCode = 400;
-    throw error;
+class UserService {
+  async createUser(data) {
+    const userDTO = new UserCreateDTO(data);
+    const user = await UserRepository.create(userDTO);
+    return new UserResponseDTO(user);
   }
 
-  try {
-    const user = await User.create({ name, email, idade });
-    return user;
-  } catch (err) {
-    if (err.code === 11000) {
-      const error = new Error("Email já cadastrado");
-      error.statusCode = 400;
-      throw error;
-    }
-    throw err;
-  }
-};
-
-// Listar todos
-export const getUsers = async () => {
-  return User.find().sort({ createdAt: -1 });
-};
-
-// Buscar por ID
-export const getUserById = async (id) => {
-  const user = await User.findById(id);
-  if (!user) {
-    const error = new Error("Usuário não encontrado");
-    error.statusCode = 404;
-    throw error;
-  }
-  return user;
-};
-
-// Atualizar
-export const updateUser = async (id, updates) => {
-  const user = await User.findByIdAndUpdate(id, updates, {
-    new: true,
-    runValidators: true,
-    overwrite: false,
-  });
-
-  if (!user) {
-    const error = new Error("Usuário não encontrado");
-    error.statusCode = 404;
-    throw error;
+  async getUsers() {
+    const users = await UserRepository.findAll();
+    return users.map((u) => new UserResponseDTO(u));
   }
 
-  return user;
-};
-
-// Deletar
-export const deleteUser = async (id) => {
-  const user = await User.findByIdAndDelete(id);
-  if (!user) {
-    const error = new Error("Usuário não encontrado");
-    error.statusCode = 404;
-    throw error;
+  async getUserById(id) {
+    const user = await UserRepository.findById(id);
+    return user ? new UserResponseDTO(user) : null;
   }
-  return { message: "Usuário deletado com sucesso" };
-};
+
+  async updateUser(id, data) {
+    const updateDTO = new UserUpdateDTO(data);
+    const user = await UserRepository.update(id, updateDTO);
+    return user ? new UserResponseDTO(user) : null;
+  }
+
+  async deleteUser(id) {
+    return await UserRepository.delete(id);
+  }
+}
+
+export default new UserService();

@@ -1,10 +1,12 @@
-import * as userService from "../services/userService.js";
+// src/controllers/userController.js
+import userService from "../services/userService.js";
+import { HTTP_STATUS, MESSAGES } from "../constants/index.js";
 
 // Criar usuário
 export const createUser = async (req, res, next) => {
   try {
     const user = await userService.createUser(req.body);
-    return res.status(201).json(user);
+    return res.status(HTTP_STATUS.CREATED).json(user); // já vem como DTO
   } catch (err) {
     return next(err);
   }
@@ -14,7 +16,7 @@ export const createUser = async (req, res, next) => {
 export const getUsers = async (req, res, next) => {
   try {
     const users = await userService.getUsers();
-    return res.status(200).json(users);
+    return res.status(HTTP_STATUS.OK).json(users); // lista de DTOs
   } catch (err) {
     return next(err);
   }
@@ -24,7 +26,12 @@ export const getUsers = async (req, res, next) => {
 export const getUserById = async (req, res, next) => {
   try {
     const user = await userService.getUserById(req.params.id);
-    return res.status(200).json(user);
+    if (!user) {
+      return res
+        .status(HTTP_STATUS.NOT_FOUND)
+        .json({ message: MESSAGES.USER.NOT_FOUND });
+    }
+    return res.status(HTTP_STATUS.OK).json(user);
   } catch (err) {
     return next(err);
   }
@@ -34,7 +41,12 @@ export const getUserById = async (req, res, next) => {
 export const updateUser = async (req, res, next) => {
   try {
     const user = await userService.updateUser(req.params.id, req.body);
-    return res.status(200).json(user);
+    if (!user) {
+      return res
+        .status(HTTP_STATUS.NOT_FOUND)
+        .json({ message: MESSAGES.USER.NOT_FOUND });
+    }
+    return res.status(HTTP_STATUS.OK).json(user);
   } catch (err) {
     return next(err);
   }
@@ -44,7 +56,14 @@ export const updateUser = async (req, res, next) => {
 export const deleteUser = async (req, res, next) => {
   try {
     const result = await userService.deleteUser(req.params.id);
-    return res.status(200).json(result);
+    if (!result) {
+      return res
+        .status(HTTP_STATUS.NOT_FOUND)
+        .json({ message: MESSAGES.USER.NOT_FOUND });
+    }
+    return res
+      .status(HTTP_STATUS.OK)
+      .json({ success: true, message: MESSAGES.USER.DELETED });
   } catch (err) {
     return next(err);
   }
