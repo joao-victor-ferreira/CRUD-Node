@@ -21,7 +21,9 @@ jest.setTimeout(20000);
 beforeAll(async () => {
   const uri = process.env.MONGO_URI;
   if (!uri) {
-    throw new Error("❌ MONGO_URI não carregado. Verifique seu arquivo .env.test");
+    throw new Error(
+      "❌ MONGO_URI não carregado. Verifique seu arquivo .env.test"
+    );
   }
   const mongoTestUri = uri.replace("Teste", "TesteJest");
   await mongoose.connect(mongoTestUri);
@@ -48,11 +50,13 @@ const getErrorMessage = (body) => {
 
 describe("API /api/users", () => {
   it("deve criar um novo usuário", async () => {
-    const res = await request(app).post("/api/users").send({
-      name: "Teste",
-      email: `teste${Date.now()}@email.com`,
-      idade: 30,
-    });
+    const res = await request(app)
+      .post("/api/users")
+      .send({
+        name: "Teste",
+        email: `teste${Date.now()}@email.com`,
+        idade: 30,
+      });
 
     expect(res.statusCode).toBe(201);
     expect(res.body).toHaveProperty("id");

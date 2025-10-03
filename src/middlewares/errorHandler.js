@@ -20,7 +20,7 @@ export default function errorHandler(err, req, res, next) {
 
     // Se tiver detalhes de validação (ex: Joi), junta as mensagens
     if (err.details) {
-      errorResponse.message = err.details.map(d => d.message).join(", ");
+      errorResponse.message = err.details.map((d) => d.message).join(", ");
     } else {
       errorResponse.message = err.message || "Erro de validação";
     }
